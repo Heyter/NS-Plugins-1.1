@@ -309,10 +309,9 @@ else
 		nut.group.list[id] = groupTable
 	end)
 
-	local tx, ty 
+	/*local tx, ty 
 	function PLUGIN:DrawCharInfo(character, x, y, alpha)
-		local groupID = character:getGroup()
-		local group = nut.group.list[groupID] 
+		local group = nut.group.list[character:getData("groupID", 0)] 
 
 		if (group) then
 			tx, ty = nut.util.drawText(L("groupHUD", group.name), x, y, ColorAlpha(color_white, alpha), 1, 1, "nutSmallFont", alpha * 0.65)
@@ -320,7 +319,7 @@ else
 		end
 
 		return x, y
-	end
+	end*/
 
 	function PLUGIN:CreateCharInfoText(self)
 		local group = LocalPlayer():getChar():getGroup()
@@ -428,10 +427,10 @@ do
 			local target = nut.command.findPlayer(client, arguments[1])
 
 			if (IsValid(target) and target:getChar()) then
-				--if target == client then
-					--client:notify(L("groupFailInvited", client))
-					--return
-				--end
+				if target == client then
+					client:notify(L("groupFailInvited", client))
+					return
+				end
 			
 				local char = client:getChar()
 				local groupID = char:getGroup()
