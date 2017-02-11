@@ -1,6 +1,6 @@
 PLUGIN.name = "Health player"
 PLUGIN.author = "Hikka (NS 1.1)"
-PLUGIN.desc = "Change alternative HP system" -- Изменяет текущую систему ХП, т.е если игрок вышел с 50HP, то при заходе у него будет 50HP :D
+PLUGIN.desc = "Saves the health of a character." -- Изменяет текущую систему ХП, т.е если игрок вышел с 50HP, то при заходе у него будет 50HP :D
 
 function PLUGIN:DoPlayerDeath(client, inflictor, attacker)
 	local char = client:getChar()
