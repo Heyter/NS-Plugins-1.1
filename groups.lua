@@ -22,7 +22,7 @@ do
 		groupFail = "Такая группа уже существует.",
 		groupExists = "Вы уже состоите в группе %s.",
 		groupInvalid = "Такой группы не существует.",
-		groupHUD = "Состоит в группе '%s'.",
+		groupHUD = "Группа: %s",
 		groupGotKicked = "Вас исключили из группы.",
 		groupNotMember = "Данный участник не находится в вашей группе.",
 		groupKicked = "Вы исключили %s из группы.",
@@ -167,11 +167,9 @@ if (SERVER) then
 
 			if (group) then
 				local members = nut.group.getMembers(groupID)
-				--local kickerRank = (!kicker and 0 or members[kickerChar:getID()])
 				local charRank = members[self:getID()]
 
 				if (charRank) then
-					--if (kickerRank < charRank) then
 					if charRank == GROUP_OWNER then
 						self:setData("groupID", nil, nil, player.GetAll())
 						return true
@@ -234,18 +232,6 @@ if (SERVER) then
 
 			return false
 		end
-
-		/*function charMeta:joinGroup(groupID)
-			local group = nut.group.list[groupID]
-
-			if (group) then
-				nut.group.list[groupID].members[self:getID()] = GROUP_NORMAL
-				self:setData("groupID", groupID, nil, player.GetAll())
-				return true
-			end
-
-			return false
-		end*/ -- старая функция
 	end
 
 	function nut.group.syncGroup(groupID)
@@ -308,18 +294,13 @@ else
 	netstream.Hook("nutGroupSync", function(id, groupTable)
 		nut.group.list[id] = groupTable
 	end)
-
-	/*local tx, ty 
-	function PLUGIN:DrawCharInfo(character, x, y, alpha)
-		local group = nut.group.list[character:getData("groupID", 0)] 
-
+	
+	function PLUGIN:DrawCharInfo(client, character, info)
+		local group = nut.group.list[LocalPlayer():getChar():getData("groupID", 0)]
 		if (group) then
-			tx, ty = nut.util.drawText(L("groupHUD", group.name), x, y, ColorAlpha(color_white, alpha), 1, 1, "nutSmallFont", alpha * 0.65)
-			y = y + ty
+			info[#info + 1] = {L("groupHUD", group.name), Color(0, 255, 255)}
 		end
-
-		return x, y
-	end*/
+	end
 
 	function PLUGIN:CreateCharInfoText(self)
 		local group = LocalPlayer():getChar():getGroup()
@@ -436,7 +417,6 @@ do
 				local groupID = char:getGroup()
 				local tChar = target:getChar()
 				
-				--tChar:joinGroup(groupID)
 				if (tChar:joinGroup(char, groupID)) then
 					client:notify(L("groupInvited", client, nut.group.list[groupID].name))
 				end
