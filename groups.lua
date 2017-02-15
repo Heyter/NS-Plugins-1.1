@@ -12,6 +12,8 @@ GROUP_OWNER = 0
 GROUP_ADMIN = 1
 GROUP_NORMAL = 2
 
+NUT_CVAR_INVITE_PARTY = CreateClientConVar("nut_party_invite", 1, true, true)
+
 local langkey = "russian"
 do
 	local langTable = {
@@ -25,19 +27,22 @@ do
 		groupHUD = "Группа: %s",
 		groupGotKicked = "Вас исключили из группы.",
 		groupNotMember = "Данный участник не находится в вашей группе.",
-		groupKicked = "Вы исключили %s из группы.",
+		groupKicked = "Вы исключили %s из вашей группы.",
 		groupShort = "Имя группы слишком короткое. Минимум %s символа.",
 		groupChar = "Вы %s в группе %s.",
 		groupFailInvited = "Нельзя пригласить самого себя",
 		groupFailKicked = "Нельзя исключить самого себя",
-		groupInvited = "Вы были приглашены в группу %s",
+		groupInvited = "Вас пригласили в группу %s",
+		groupInvitedWho = "Вы пригласили %s в вашу группу",
 		groupMyLeave = "Вы покинули группу %s",
 		groupNotMyGroup = "Вы не состоите в группе",
 		groupMember = "Участник",
-		groupCreator = "Создатель",
+		groupCreator = "Лидер",
 		groupNameDesc = "Впишите имя группы",
 		groupNameBox = "Создать свою группу",
-		groupLong = "Имя группы слишком длинное. Максимум %s символов"
+		groupLong = "Имя группы слишком длинное. Максимум %s символов",
+		groupYourMember = "Данный участник уже состоит в вашей группе",
+		groupStopInvited = "%s запретил приглашать его в группы"
 	}
 
 	table.Merge(nut.lang.stored[langkey], langTable)
@@ -114,6 +119,7 @@ if (SERVER) then
 				return true
 			else
 				client:notify(L("groupFail", client))
+				return false
 			end
 		else
 			client:notify(L("groupExists", client, nut.group.list[self:getGroup()].name))
@@ -170,14 +176,17 @@ if (SERVER) then
 				local charRank = members[self:getID()]
 
 				if (charRank) then
-					if charRank == GROUP_OWNER then
+					--if charRank == GROUP_OWNER then
+					if members[kickerChar:getID()] == GROUP_OWNER then
 						self:setData("groupID", nil, nil, player.GetAll())
 						return true
 					else
 						kicker:notify(L("groupPermission", kicker))
+						return false
 					end
 				else
 					kicker:notify(L("groupNotMember", kicker))
+					return false
 				end
 			else
 				kicker:notify(L("groupInvalid", kicker))
@@ -193,7 +202,6 @@ if (SERVER) then
 
 			if (group) then
 				local members = nut.group.getMembers(groupID)
-				--local kickerRank = (!kicker and 0 or members[kickerChar:getID()])
 				local charRank = members[self:getID()]
 
 				if (charRank) then
@@ -201,6 +209,7 @@ if (SERVER) then
 					return true
 				else
 					kicker:notify(L("groupNotMyGroup", kicker))
+					return false
 				end
 			else
 				kicker:notify(L("groupInvalid", kicker))
@@ -216,17 +225,21 @@ if (SERVER) then
 
 			if (group) then
 				local members = nut.group.getMembers(groupID)
-				local charRank = members[self:getID()]
 
-				if (charRank) then
-					if charRank == GROUP_OWNER then
+				if (!members[self:getID()]) then
+					if members[kickerChar:getID()] == GROUP_OWNER then
 						nut.group.list[groupID].members[self:getID()] = GROUP_NORMAL
 						self:setData("groupID", groupID, nil, player.GetAll())
+						--self.GroupInvite = groupID
+						--timer.Simple(25, function() if IsValid(self) then self.GroupInvite = nil end end)
 						return true
 					else
 						kicker:notify(L("groupPermission", kicker))
 						return false
 					end
+				else
+					kicker:notify(L("groupYourMember", kicker))
+					return false
 				end
 			end
 
@@ -297,7 +310,7 @@ else
 	
 	function PLUGIN:DrawCharInfo(client, character, info)
 		local group = nut.group.list[LocalPlayer():getChar():getData("groupID", 0)]
-		if (group) then
+		if (group != nil) then
 			info[#info + 1] = {L("groupHUD", group.name), Color(0, 255, 255)}
 		end
 	end
@@ -323,6 +336,18 @@ else
 			end
 			self.group:SetText(L("groupChar", rank, nut.group.list[group].name or "ERROR"))
 		end
+	end
+	
+	function PLUGIN:SetupQuickMenu(menu)
+		 local button = menu:addCheck("Приглашать Вас в группы?", function(panel, state)
+		 	if (state) then
+		 		RunConsoleCommand("nut_party_invite", "1")
+		 	else
+		 		RunConsoleCommand("nut_party_invite", "0")
+		 	end
+		 end, NUT_CVAR_INVITE_PARTY:GetBool())
+
+		 menu:addSpacer()
 	end
 end
 
@@ -412,13 +437,24 @@ do
 					client:notify(L("groupFailInvited", client))
 					return
 				end
+				
+				if target:GetInfoNum("nut_party_invite", 0) < 1 then
+					client:notify(L("groupStopInvited", client, target:Name()))
+					return
+				end
+				
+				--if target:getChar().GroupInvite then -- эксперементальное (не проверял)
+					--client:notify("Этому игроку уже выслано приглашение")
+					--return
+				--end
 			
 				local char = client:getChar()
 				local groupID = char:getGroup()
-				local tChar = target:getChar()
+				--local tChar = target:getChar()
 				
-				if (tChar:joinGroup(char, groupID)) then
-					client:notify(L("groupInvited", client, nut.group.list[groupID].name))
+				if (target:getChar():joinGroup(char, groupID)) then
+					target:notify(L("groupInvited", client, nut.group.list[groupID].name))
+					client:notify(L("groupInvitedWho", client, target:Name()))
 				end
 			end
 				
@@ -442,9 +478,8 @@ do
 				
 				local char = client:getChar()
 				local groupID = char:getGroup()
-				local tChar = target:getChar()
 
-				if (tChar:kickGroup(char, groupID)) then
+				if (target:getChar():kickGroup(char, groupID)) then
 					client:notify(L("groupKicked", client, target:Name()))	
 					target:notify(L("groupGotKicked", target))	
 				end
