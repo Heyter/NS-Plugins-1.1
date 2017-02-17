@@ -1,0 +1,9 @@
+ITEM.name = "Мусор"
+ITEM.desc = "Алюминевая банка из под специальной воды брина."
+ITEM.model = "models/props_junk/popcan01a.mdl"
+ITEM.category = "Еда"
+ITEM.skin = 1
+ITEM.hunger = 0
+ITEM.thirst = 0
+ITEM.empty = true
+ITEM.permit = "food"
