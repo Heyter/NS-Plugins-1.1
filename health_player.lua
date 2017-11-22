@@ -29,9 +29,7 @@ function PLUGIN:PlayerSpawn(client) -- safe
 			return
 		end
 		
-		timer.Simple(1, function() -- safe
-			client:SetHealth(math.Clamp(hp, 0, hpAmount))
-		end)
+		client:SetHealth(math.Clamp(hp, 0, hpAmount))
 	end
 end
 
@@ -50,13 +48,21 @@ function PLUGIN:CharacterPreSave(character)
 	end
 end
 
-function PLUGIN:PlayerLoadedChar(client, character)
-	timer.Simple(0, function()
+function PLUGIN:PlayerLoadedChar(client)
+	timer.Simple(0.25, function()
 		if (IsValid(client)) then
-			local hp = character:getData(HealthID)
+			local character = client:getChar()
+			
+			if (!character) then
+				return
+			end
+		
+			local hpData = character:getData(HealthID)
 			local hpAmount = client:GetMaxHealth()
-			if (!hp or hp < 1) then
+			if (!hpData or hpData < 1) then
 				char:setData(HealthID, hpAmount)
+			elseif (hpData and hpData > 0) then
+				client:SetHealth(math.Clamp(hpData, 0, hpAmount))
 			end
 		end
 	end)
