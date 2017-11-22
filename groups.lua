@@ -336,11 +336,9 @@ else
 			local members = nut.group.getMembers(groupID)
 			local ranks = members[char:getID()]
 			
-			local rank = "NONE"
+			local rank = L("groupMember")
 			if ranks and ranks == GROUP_OWNER then
 				rank = L("groupCreator")
-			else
-				rank = L("groupMember")
 			end
 			
 			self.group:SetText(L("groupChar", rank, nut.group.list[group].name or "ERROR"))
