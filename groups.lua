@@ -1,19 +1,15 @@
 local PLUGIN = PLUGIN
-PLUGIN.name = "Squad"
+PLUGIN.name = "Groups"
 PLUGIN.author = "Black Tea, Hikka (NS 1.1)"
-PLUGIN.desc = "You can make the squads."
+PLUGIN.desc = "You can make the groups."
 
 -- make it like lib.
 local charMeta = nut.meta.character
 nut.group = nut.group or {}
 nut.group.list = nut.group.list or {}
 
-GROUP_OWNER = 0
-GROUP_ADMIN = 1
-GROUP_NORMAL = 2
-
-NUT_CVAR_INVITE_PARTY = CreateClientConVar("nut_party_invite", 1, true, true)
-
+local GROUP_OWNER, GROUP_ADMIN, GROUP_NORMAL = 0, 1, 2
+local NUT_CVAR_INVITE_PARTY = CreateClientConVar("nut_party_invite", 1, true, true)
 local langkey = "russian"
 do
 	local langTable = {
@@ -123,7 +119,6 @@ if (SERVER) then
 				return true
 			else
 				client:notify(L("groupFail", client))
-				return false
 			end
 		else
 			client:notify(L("groupExists", client, nut.group.list[self:getGroup()].name))
@@ -160,7 +155,6 @@ if (SERVER) then
 					return true
 				else
 					client:notify(L("groupPermission", client))
-					return false
 				end
 			else
 				client:notify(L("groupInvalid", client))
@@ -185,11 +179,9 @@ if (SERVER) then
 						return true
 					else
 						kicker:notify(L("groupPermission", kicker))
-						return false
 					end
 				else
 					kicker:notify(L("groupNotMember", kicker))
-					return false
 				end
 			else
 				kicker:notify(L("groupInvalid", kicker))
@@ -216,7 +208,6 @@ if (SERVER) then
 					return true
 				else
 					client:notify(L("groupNotMyGroup", client))
-					return false
 				end
 			else
 				client:notify(L("groupInvalid", client))
@@ -267,7 +258,7 @@ if (SERVER) then
 			groupTable = table.Copy(groupTable)
 		end
 
-		netstream.Start(player.GetAll(), "nutGroupSync", groupID, groupTable)
+		netstream.Start(nil, "nutGroupSync", groupID, groupTable)
 	end
 
 	function nut.group.syncAll(client)
@@ -310,7 +301,7 @@ if (SERVER) then
 			local groupID = char:getGroup()
 			local aliveMembers = nut.group.getAliveMembers(groupID)
 
-			if (table.Count(aliveMembers) < 1) then
+			if (table.Count(aliveMembers) <= 1) then
 				nut.group.save(groupID)
 				nut.group.list[groupID] = nil
 			end
@@ -322,15 +313,17 @@ else
 	end)
 	
 	function PLUGIN:DrawCharInfo(client, character, info)
-		local group = nut.group.list[LocalPlayer():getChar():getGroup()]
+		--local group = nut.group.list[LocalPlayer():getChar():getGroup()]
+		local groupID = character:getGroup()
+		local group = nut.group.list[groupID]
 		if (group) then
 			info[#info + 1] = {L("groupHUD", group.name), Color(0, 255, 255)}
 		end
 	end
 
 	function PLUGIN:CreateCharInfoText(self)
-		local group = LocalPlayer():getChar():getGroup()
-
+		local client = LocalPlayer()
+		local group = client:getChar():getGroup()
 		if (nut.group.list[group]) then
 			self.group = self.info:Add("DLabel")
 			self.group:Dock(TOP)
@@ -338,15 +331,18 @@ else
 			self.group:SetTextColor(color_white)
 			self.group:SetExpensiveShadow(1, Color(0, 0, 0, 150))
 			self.group:DockMargin(0, 10, 0, 0)
-			local char = LocalPlayer():getChar()
+			local char = client:getChar()
 			local groupID = char:getGroup()
 			local members = nut.group.getMembers(groupID)
 			local ranks = members[char:getID()]
-			if ranks && ranks == GROUP_OWNER then
+			
+			local rank = "NONE"
+			if ranks and ranks == GROUP_OWNER then
 				rank = L("groupCreator")
 			else
 				rank = L("groupMember")
 			end
+			
 			self.group:SetText(L("groupChar", rank, nut.group.list[group].name or "ERROR"))
 		end
 	end
@@ -499,8 +495,8 @@ do
 	
 	nut.command.add("groupleave", {
 		onRun = function(client, arguments)
-			if (IsValid(client) and client:getChar()) then
-				local char = client:getChar()
+			local char = client:getChar()
+			if (IsValid(client) and char) then
 				local groupID = char:getGroup()
 				if (char:leaveGroup(groupID)) then
 					client:notify(L("groupMyLeave", client, nut.group.list[groupID].name))		
