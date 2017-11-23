@@ -33,7 +33,12 @@ if (SERVER) then
 
 	function PLUGIN:CharacterPreSave(character)
 		local client = character.player
-		local savedHealth = client:getHealth()
+		local savedHealth = client:Health()
+		
+		if (savedHealth <= 0) then
+			return
+		end
+		
 		local maxHealth = client:GetMaxHealth()
 		character:setData(HealthID, math.Clamp(savedHealth, 0, maxHealth))
 	end
