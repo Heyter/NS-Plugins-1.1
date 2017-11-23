@@ -24,22 +24,27 @@ function PLUGIN:OnNPCKilled(entity, attacker)
 		return
 	end
 
-	local chnce, class = 100 * math.random(), entity:GetClass()
-	for _, data in ipairs(self.itemDrops) do
-		local dropTbl = data.drop
-		local moneyTbl = data.money
-		
-		if (class == dropTbl.npc) then
-			if (chnce > dropTbl.chance) then
-				break
+	local chnce, class, money = 100 * math.random(), entity:GetClass(), self.itemDrops.money
+	local item,npcc,chancce
+	for _, data in ipairs(self.itemDrops.drop) do
+		for _, npc in ipairs(data.npc) do
+			if (class == npc) then
+				npcc = npc
+				chancce = data.chance
+				item = data.item
 			end
-			
-			if (moneyTbl.enabled) then
-				nut.currency.spawn(entity:GetPos() + Vector(0, 0, 20), math.random(1, moneyTbl.amount or 100))
-			end
-			
-			nut.item.spawn(table.Random(dropTbl.item), entity:GetPos() + Vector(0, 0, 15))
 		end
-		break
+	end
+	
+	if (class == npcc) then
+		if (chnce > chancce) then
+			return
+		end
+		
+		if (money.enabled) then
+			nut.currency.spawn(entity:GetPos() + Vector(0, 0, 20), math.random(1, money.amount or 100))
+		end
+		
+		nut.item.spawn(item, entity:GetPos() + Vector(0, 0, 15))
 	end
 end
