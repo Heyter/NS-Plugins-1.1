@@ -1,17 +1,21 @@
+local PLUGIN = PLUGIN
+
 PLUGIN.name = "NPC Item Drop"
 PLUGIN.author = "Hikka (NS 1.1)"
 PLUGIN.desc = "За убийство NPC, будет выпадать вещь"
 
 PLUGIN.itemDrops = {
 	drop = {
-		{item = "pistol", chance = 100, npc = {"npc_zombie"}}, -- выпадаемый предмет; шанс выпадения с NPC; типы NPC с которых выпадет вещь.
-		{item = "spraycan", chance = 10, npc = {"npc_zombie", "npc_bug"}},
-		{item = "water", chance = 15, npc = {"npc_zombie", "npc_bug", "npc_fastzombie"}},
+		-- Вещь которая выпадет с NPC; шанс выпадение вещи; тип NPC с которого упадет вещь.
+		{items = {"spray", "water"}, chance = 50, class = "npc_zombie"},
+		{items = {"spray", "food"}, chance = 100, class = "npc_fastzombie"},
+		{items = {"spray", "food"}, chance = 100, class = "npc_gman"},
 	},
 	
 	money = {
 		enabled = true, -- Выпадение денег при убийстве NPC. (true/false)
 		amount = 100, -- Максимальная сумма выпадения денег.
+		all = true, -- Выпадение денег СО всех NPC? Вне зависимости от настроек таблицы drop. (true - да; false - нет)
 	},
 }
 
@@ -24,27 +28,24 @@ function PLUGIN:OnNPCKilled(entity, attacker)
 		return
 	end
 
-	local chnce, class, money = 100 * math.random(), entity:GetClass(), self.itemDrops.money
-	local item,npcc,chancce
-	for _, data in ipairs(self.itemDrops.drop) do
-		for _, npc in ipairs(data.npc) do
-			if (class == npc) then
-				npcc = npc
-				chancce = data.chance
-				item = data.item
-			end
-		end
+	local chnce, class, money, pos = 100 * math.random(), entity:GetClass(), self.itemDrops.money, entity:GetPos()
+	
+	if (money.enabled and money.all) then
+		nut.currency.spawn(pos + Vector(0, 0, 20), math.random(1, money.amount or 100))
 	end
 	
-	if (class == npcc) then
-		if (chnce > chancce) then
-			return
+	for _, data in ipairs(self.itemDrops.drop) do
+		if (class == data.class) then
+			if (chnce > data.chance) then
+				break
+			end
+			
+			if (money.enabled and !money.all) then
+				nut.currency.spawn(pos + Vector(0, 0, 20), math.random(1, money.amount or 100))
+			end
+			
+			nut.item.spawn(table.Random(data.items), pos + Vector(0, 0, 15))
+			break
 		end
-		
-		if (money.enabled) then
-			nut.currency.spawn(entity:GetPos() + Vector(0, 0, 20), math.random(1, money.amount or 100))
-		end
-		
-		nut.item.spawn(item, entity:GetPos() + Vector(0, 0, 15))
 	end
 end
