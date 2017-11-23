@@ -4,66 +4,45 @@ PLUGIN.desc = "Saves the health of a character." -- Изменяет текущ�
 
 local HealthID = "saveHealth" -- переменная которая хранит ID сохраняемого здоровья.
 
-function PLUGIN:DoPlayerDeath(client)
-	if (!IsValid(client) and !client:IsPlayer()) then
-		return
-	end
-
-	local char = client:getChar()
-	if (char) then 
-		char:setData(HealthID, nil) 
-	end
+local playerMeta = FindMetaTable("Player")
+function playerMeta:getHealth()
+	return (self:getNetVar(HealthID)) or 0
 end
 
-function PLUGIN:PlayerSpawn(client) -- safe
+function PLUGIN:PlayerDeath(client)
 	if (!IsValid(client) and !client:IsPlayer()) then
 		return
 	end
 
-	local char = client:getChar()
-	if (char) then
-		local hp = char:getData(HealthID)
+	client.refillHealth = true
+end
+
+function PLUGIN:PlayerSpawn(client)
+	if (!IsValid(client) and !client:IsPlayer()) then
+		return
+	end
+	
+	if (client.refillHealth) then
 		local hpAmount = client:GetMaxHealth()
-		if (!hp or hp < 1) then
-			char:setData(HealthID, hpAmount)
-			return
-		end
-		
-		client:SetHealth(math.Clamp(hp, 0, hpAmount))
+		client:setNetVar(HealthID, hpAmount)
+		client.refillHealth = false
 	end
-end
-
-function PLUGIN:OnCharCreated(client, char)
-	char:setData(HealthID, client:GetMaxHealth())
 end
 
 function PLUGIN:CharacterPreSave(character)
-	local client = character:getPlayer()
-
-	if (IsValid(client)) then
-		local hp = client:Health()
-		if (hp > 0) then
-			character:setData(HealthID, hp)
-		end
-	end
+	local client = character.player
+	local savedHealth = client:getHealth()
+	local maxHealth = client:GetMaxHealth()
+	character:setData(HealthID, math.Clamp(savedHealth, 0, maxHealth))
 end
 
-function PLUGIN:PlayerLoadedChar(client)
-	timer.Simple(0.25, function()
-		if (IsValid(client)) then
-			local character = client:getChar()
-			
-			if (!character) then
-				return
-			end
-		
-			local hpData = character:getData(HealthID)
-			local hpAmount = client:GetMaxHealth()
-			if (!hpData or hpData < 1) then
-				char:setData(HealthID, hpAmount)
-			elseif (hpData and hpData > 0) then
-				client:SetHealth(math.Clamp(hpData, 0, hpAmount))
-			end
-		end
-	end)
+function PLUGIN:PlayerLoadedChar(client, character)
+	local hpData = character:getData(HealthID)
+	local hpAmount = client:GetMaxHealth()
+	if (hpData) then
+		client:setNetVar(HealthID, math.Clamp(hpData, 0, hpAmount))
+		client:SetHealth(math.Clamp(hpData, 0, hpAmount))
+	else
+		client:setNetVar(HealthID, hpAmount)
+	end
 end
