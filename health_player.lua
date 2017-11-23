@@ -32,7 +32,7 @@ if (SERVER) then
 	end
 
 	function PLUGIN:CharacterPreSave(character)
-		local client = character.player
+		local client = character:getPlayer()
 		local savedHealth = client:Health()
 		
 		if (savedHealth <= 0) then
