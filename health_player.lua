@@ -11,6 +11,7 @@ function playerMeta:getHealth()
 end
 
 if (SERVER) then
+	local IsValid = IsValid
 	function PLUGIN:PlayerDeath(client)
 		if (!IsValid(client) and !client:IsPlayer()) then
 			return
@@ -34,11 +35,6 @@ if (SERVER) then
 	function PLUGIN:CharacterPreSave(character)
 		local client = character:getPlayer()
 		local savedHealth = client:Health()
-		
-		if (savedHealth <= 0) then
-			return
-		end
-		
 		local maxHealth = client:GetMaxHealth()
 		character:setData(HealthID, math.Clamp(savedHealth, 0, maxHealth))
 	end
@@ -47,6 +43,12 @@ if (SERVER) then
 		local hpData = character:getData(HealthID)
 		local hpAmount = client:GetMaxHealth()
 		if (hpData) then
+			if (hpData <= 0) then
+				client:setNetVar(HealthID, hpAmount)
+				client:SetHealth(hpAmount)
+				return
+			end
+			
 			client:setNetVar(HealthID, math.Clamp(hpData, 0, hpAmount))
 			client:SetHealth(math.Clamp(hpData, 0, hpAmount))
 		else
