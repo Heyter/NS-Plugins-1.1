@@ -3,6 +3,8 @@ PLUGIN.name = "Groups"
 PLUGIN.author = "Black Tea, Hikka (NS 1.1)"
 PLUGIN.desc = "You can make the groups."
 
+local pairs, ipairs, IsValid = pairs, ipairs, IsValid
+
 -- make it like lib.
 local charMeta = nut.meta.character
 nut.group = nut.group or {}
@@ -91,8 +93,9 @@ if (SERVER) then
 	end
 
 	function nut.group.delete(groupID)
-		if (nut.group.list[groupID]) then
-			nut.group.list[groupID] = nil
+		local grp = nut.group.list[groupID]
+		if (grp) then
+			grp = nil
 
 			nut.group.syncGroup(groupID, nil)
 			nut.data.delete("groups/" .. groupID, false, true)
@@ -122,7 +125,7 @@ if (SERVER) then
 				return false
 			end
 		else
-			client:notify(L("groupExists", client, nut.group.list[self:getGroup()].name))
+			client:notify(L("groupExists", client, group.name))
 		end
 
 		return false
@@ -148,7 +151,7 @@ if (SERVER) then
 					end
 						
 					for k, v in ipairs(nut.group.getAliveMembers(id)) do
-						self:setData("groupID", nil, nil, player.GetAll())
+						self:setData("groupID", nil)
 					end
 
 					nut.group.delete(groupID)
@@ -177,7 +180,7 @@ if (SERVER) then
 				if (charRank) then
 					--if charRank == GROUP_OWNER then
 					if members[kickerChar:getID()] == GROUP_OWNER then
-						self:setData("groupID", nil, nil, player.GetAll())
+						self:setData("groupID", nil)
 						return true
 					else
 						kicker:notify(L("groupPermission", kicker))
@@ -208,7 +211,7 @@ if (SERVER) then
 						return false
 					end
 					
-					self:setData("groupID", nil, nil, player.GetAll())
+					self:setData("groupID", nil)
 					return true
 				else
 					client:notify(L("groupNotMyGroup", client))
@@ -230,15 +233,10 @@ if (SERVER) then
 
 				if (!members[self:getChar():getID()]) then
 					if members[client:getChar():getID()] == GROUP_OWNER then
-						--nut.group.list[groupID].members[self:getChar():getID()] = GROUP_NORMAL
-						--self:getChar():setData("groupID", groupID, nil, player.GetAll())
 						self.InviteToGroup = client
 						self:ChatPrint("Вас пригласили в "..group.name.." напишите /groupaccept чтобы принять приглашение")
 						timer.Simple(25, function()
-							if IsValid(self) then
-								self.InviteToGroup = nil
-								print("zdoh timer")
-							end
+							if IsValid(self) then self.InviteToGroup = nil end
 						end)
 
 						return true
@@ -257,13 +255,13 @@ if (SERVER) then
 	end
 
 	function nut.group.syncGroup(groupID)
-		groupTable = nut.group.list[groupID]
+		local groupTable = nut.group.list[groupID]
 
 		if (groupTable) then
 			groupTable = table.Copy(groupTable)
 		end
 
-		netstream.Start(player.GetAll(), "nutGroupSync", groupID, groupTable)
+		netstream.Start(nil, "nutGroupSync", groupID, groupTable)
 	end
 
 	function nut.group.syncAll(client)
@@ -281,8 +279,8 @@ if (SERVER) then
 			local groupInfo = nut.group.load(groupID)
 
 			if (groupInfo) then
-				nut.group.list[groupID] = groupInfo
-				char:setData("groupID", groupID, nil, player.GetAll())
+				groupTable = groupInfo
+				char:setData("groupID", groupID)
 			else
 				if (groupID != 0) then
 					char:setData("groupID", nil)
@@ -329,7 +327,8 @@ else
 	function PLUGIN:CreateCharInfoText(self)
 		local client = LocalPlayer()
 		local group = client:getChar():getGroup()
-		if (nut.group.list[group]) then
+		local grp = nut.group.list[group]
+		if (grp) then
 			self.group = self.info:Add("DLabel")
 			self.group:Dock(TOP)
 			self.group:SetFont("nutMediumFont")
@@ -346,7 +345,7 @@ else
 				rank = L("groupCreator")
 			end
 			
-			self.group:SetText(L("groupChar", rank, nut.group.list[group].name or "ERROR"))
+			self.group:SetText(L("groupChar", rank, grp.name or "ERROR"))
 		end
 	end
 	
@@ -368,7 +367,8 @@ function charMeta:getGroup()
 end
 
 function nut.group.getMembers(id)
-	return (nut.group.list[id] and (nut.group.list[id].members or {}) or {})
+	local grp = nut.group.list[id]
+	return (grp and (grp.members or {}) or {})
 end
 
 function nut.group.getAliveMembers(id)
@@ -400,9 +400,10 @@ do
 				local groupName = table.concat(arguments, " ")
 				local char = client:getChar()
 				local groupID = char:getGroup()
+				local grpTable = nut.group.list[groupID]
 				
-				if nut.group.list[groupID] then
-					client:notify(L("groupExists", client, nut.group.list[groupID].name))
+				if grpTable then
+					client:notify(L("groupExists", client, grpTable.name))
 					return
 				end
 				
@@ -538,11 +539,11 @@ do
 			if !client.InviteToGroup then client:notify(L("groupNotAccept", client)) return end
 			local char = client.InviteToGroup:getChar()
 			local groupID = char:getGroup()
+			local grpTable = nut.group.list[groupID]
 			
-			nut.group.list[groupID].members[char:getID()] = GROUP_NORMAL
-			char:setData("groupID", groupID, nil, player.GetAll())
-			--char:setData("groupID", nil, nil, player.GetAll()) -- проверял
-			client:notify(L("groupAcceptYES", client, nut.group.list[groupID].name))
+			grpTable.members[char:getID()] = GROUP_NORMAL
+			char:setData("groupID", groupID)
+			client:notify(L("groupAcceptYES", client, grpTable.name))
 		end
 	})
 end
