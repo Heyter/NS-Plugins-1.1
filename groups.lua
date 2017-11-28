@@ -8,8 +8,8 @@ local charMeta = nut.meta.character
 nut.group = nut.group or {}
 nut.group.list = nut.group.list or {}
 
-local GROUP_OWNER, GROUP_ADMIN, GROUP_NORMAL = 0, 1, 2
-local NUT_CVAR_INVITE_PARTY = CreateClientConVar("nut_party_invite", 1, true, true)
+GROUP_OWNER, GROUP_ADMIN, GROUP_NORMAL = 0, 1, 2
+NUT_CVAR_INVITE_PARTY = CreateClientConVar("nut_party_invite", 1, true, true)
 local langkey = "russian"
 do
 	local langTable = {
