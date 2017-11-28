@@ -15,7 +15,7 @@ ITEM.resistData = { -- http://wiki.garrysmod.com/page/Enums/DMG
 	[DMG_BURN] = 1,
 	[DMG_GENERIC] = 1,
 }
-ITEM.SetSpeed = 2
+ITEM.SetSpeed = 1
 
 -- Inventory drawing
 if (CLIENT) then
