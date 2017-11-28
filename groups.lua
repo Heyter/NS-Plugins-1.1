@@ -119,6 +119,7 @@ if (SERVER) then
 				return true
 			else
 				client:notify(L("groupFail", client))
+				return false
 			end
 		else
 			client:notify(L("groupExists", client, nut.group.list[self:getGroup()].name))
@@ -155,6 +156,7 @@ if (SERVER) then
 					return true
 				else
 					client:notify(L("groupPermission", client))
+					return false
 				end
 			else
 				client:notify(L("groupInvalid", client))
@@ -179,9 +181,11 @@ if (SERVER) then
 						return true
 					else
 						kicker:notify(L("groupPermission", kicker))
+						return false
 					end
 				else
 					kicker:notify(L("groupNotMember", kicker))
+					return false
 				end
 			else
 				kicker:notify(L("groupInvalid", kicker))
@@ -208,6 +212,7 @@ if (SERVER) then
 					return true
 				else
 					client:notify(L("groupNotMyGroup", client))
+					return false
 				end
 			else
 				client:notify(L("groupInvalid", client))
@@ -258,7 +263,7 @@ if (SERVER) then
 			groupTable = table.Copy(groupTable)
 		end
 
-		netstream.Start(nil, "nutGroupSync", groupID, groupTable)
+		netstream.Start(player.GetAll(), "nutGroupSync", groupID, groupTable)
 	end
 
 	function nut.group.syncAll(client)
