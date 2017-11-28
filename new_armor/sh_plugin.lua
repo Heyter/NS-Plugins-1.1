@@ -6,15 +6,17 @@ PLUGIN.desc = "armor, different types of damage and deflection."
 nut.util.include("sv_plugin.lua")
 nut.util.include("cl_vgui.lua")
 
+local MOVETYPE_NONE = MOVETYPE_NONE
+
 function PLUGIN:Move(client, mv)
-	if (client:GetMoveType() != MOVETYPE_WALK) then return end
+	if (client:GetMoveType() == MOVETYPE_NONE) then return end
 	
 	local char = client:getChar()
-	local f,s = mv:GetForwardSpeed(), mv:GetSideSpeed()
+	local f,s = mv:GetMaxClientSpeed(), mv:GetMaxSpeed()
 	local speed = client:getNetVar("armorSpeed", 1)
 
 	if (char and speed) then
-		mv:SetForwardSpeed(f * speed)
-		mv:SetSideSpeed(s * speed)
+		mv:SetMaxClientSpeed(f * speed)
+		mv:SetMaxSpeed(s * speed)
 	end
 end

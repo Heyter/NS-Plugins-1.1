@@ -105,6 +105,9 @@ ITEM.functions.Preview = {
 		netstream.Start(item.player, "nutArmorPreview", item.SetModel)
 		return false
 	end,
+	onCanRun = function(item)
+		return (!IsValid(item.entity))
+	end
 }
 
 function ITEM:onCanBeTransfered(oldInventory, newInventory)
@@ -170,20 +173,16 @@ local DMG_ENUMS = {
 local function dmgInfo(data)
 	local text = "Different"
 	if (DMG_ENUMS[data]) then
-		return tostring(text)
-	else
-		return text
+		text = DMG_ENUMS[data]
 	end
+	return text
 end
 
-function ITEM:getDesc()
-	local desc = self.desc
-	desc = desc.."\n Characteristics: "
-	for k, _ in pairs(self.resistData) do
-		if (self.resistData[k] == 1) then 
-			continue
-		end
-		desc = Format("%s \n [*] Defence from %s: %d", desc, dmgInfo(k), math.Round((1 - self.resistData[k]), 1))
+function ITEM:getDesc()	
+	local desc = ""
+	for k in pairs(self.resistData) do
+		if (self.resistData[k] == 1) then continue end
+		desc = Format("%s\nDefence from: %s [%d]", self.desc, dmgInfo(k), math.Round((self.resistData[k]), 1))
 	end
 	return desc
 end
