@@ -62,11 +62,12 @@ ITEM.functions.Equip = {
 		local client = item.player
 		
 		if (item.armorGender != "all") then
-			if (client:isFemale() and item.armorGender == "male") then
-				client:notify("Only for male!")
+			local m, f = "male", "female"
+			if (client:isFemale() and item.armorGender == m) then
+				client:notify(Format("Only for %s!", m))
 				return false
-			elseif (!client:isFemale() and item.armorGender == "female") then
-				client:notify("Only for female!")
+			elseif (!client:isFemale() and item.armorGender == f) then
+				client:notify(Format("Only for %s!", f))
 				return false
 			end
 		end
@@ -150,8 +151,8 @@ local DMG_ENUMS = {
 	[DMG_SHOCK] = "Electrical",
 	[DMG_SONIC] = "Sonic",
 	[DMG_ENERGYBEAM] = "Laser",
-	[DMG_NEVERGIB] = "What it is?",
-	[DMG_ALWAYSGIB] = "What it is?",
+	[DMG_NEVERGIB] = "NEVERGIB",
+	[DMG_ALWAYSGIB] = "ALWAYSGIB",
 	[DMG_DROWN] = "Drown",
 	[DMG_PARALYZE] = "Poison",
 	[DMG_NERVEGAS] = "Neurotoxin",
@@ -160,15 +161,15 @@ local DMG_ENUMS = {
 	[DMG_AIRBOAT] = "Airboat gun",
 	[DMG_BLAST_SURFACE] = "Underwater dmg",
 	[DMG_BUCKSHOT] = "Shotgun",
-	[DMG_DIRECT] = "What it is?",
+	[DMG_DIRECT] = "DIRECT",
 	[DMG_DISSOLVE] = "Combine ball",
-	[DMG_DROWNRECOVER] = "What it is?",
+	[DMG_DROWNRECOVER] = "DROWNRECOVER",
 	[DMG_PHYSGUN] = "Gravity gun",
 	[DMG_PLASMA] = "Plasma",
 	[DMG_PREVENT_PHYSICS_FORCE] = "Physics force",
 	[DMG_RADIATION] = "Radiation",
-	[DMG_REMOVENORAGDOLL] = "What it is?",
-	[DMG_SLOWBURN] = "What it is?",
+	[DMG_REMOVENORAGDOLL] = "REMOVENORAGDOLL",
+	[DMG_SLOWBURN] = "SLOWBURN",
 }
 local function dmgInfo(data)
 	local text = "Different"
@@ -182,7 +183,7 @@ function ITEM:getDesc()
 	local desc = ""
 	for k in pairs(self.resistData) do
 		if (self.resistData[k] == 1) then continue end
-		desc = Format("%s\nDefence from: %s [%d]", self.desc, dmgInfo(k), math.Round((self.resistData[k]), 1))
+		desc = Format("%s\nDefence from: %s [%d]", self.desc, dmgInfo(k), self.resistData[k])
 	end
 	return desc
 end

@@ -7,7 +7,7 @@ ITEM.armorGender = "all" -- [ female - only for girls; male - only for mans; all
 ITEM.width = 1
 ITEM.height = 1
 ITEM.resistData = { -- http://wiki.garrysmod.com/page/Enums/DMG
-	[DMG_GENERIC] = 10,
+	[DMG_FALL] = 0.3,
 }
 ITEM.price = 0
-ITEM.SetSpeed = 2
+ITEM.SetSpeed = 1
