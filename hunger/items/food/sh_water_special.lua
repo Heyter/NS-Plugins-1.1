@@ -1,9 +1,0 @@
-ITEM.name = "Special Water"
-ITEM.desc = "A blue can of plain water."
-ITEM.model = "models/props_junk/popcan01a.mdl"
-ITEM.category = "Еда"
-ITEM.skin = 1
-ITEM.hunger = 0
-ITEM.thirst = 25
-ITEM.empty = false
-ITEM.permit = "food"
