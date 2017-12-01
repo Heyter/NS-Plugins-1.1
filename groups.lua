@@ -260,13 +260,13 @@ if (SERVER) then
 	end
 
 	function nut.group.syncGroup(groupID)
-		local groupTable = nut.group.list[groupID]
+		local group = nut.group.list[groupID]
 
-		if (groupTable) then
-			groupTable = table.Copy(groupTable)
+		if (group) then
+			group = table.Copy(group)
 		end
 
-		netstream.Start(nil, "nutGroupSync", groupID, groupTable)
+		netstream.Start(nil, "nutGroupSync", groupID, group)
 	end
 
 	function nut.group.syncAll(client)
@@ -275,16 +275,16 @@ if (SERVER) then
 		end
 	end
 
-	function PLUGIN:PlayerLoadedChar(client, curChar, prevChar)
+	function PLUGIN:PlayerLoadedChar(client)
 		local char = client:getChar()
 		local groupID = char:getGroup()
-		local groupTable = nut.group.list[groupID]
+		local group = nut.group.list[groupID]
 
-		if (!groupTable) then
+		if (!group) then
 			local groupInfo = nut.group.load(groupID)
 
 			if (groupInfo) then
-				groupTable = groupInfo
+				group = groupInfo
 				char:setData("groupID", groupID)
 			else
 				if (groupID != 0) then
@@ -316,8 +316,8 @@ if (SERVER) then
 		end
 	end
 else
-	netstream.Hook("nutGroupSync", function(id, groupTable)
-		nut.group.list[id] = groupTable
+	netstream.Hook("nutGroupSync", function(id, group)
+		nut.group.list[id] = group
 	end)
 	
 	function PLUGIN:DrawCharInfo(client, character, info)
@@ -475,35 +475,6 @@ do
 				
 		end
 	})
-	
-	/*nut.command.add("groupmeinvite", {
-		syntax = "<string name>",
-		onRun = function(client, args)
-			local charName = args[1]
-			if (!charName) then
-				return client:notify(L("invalidArg", client, 1))
-			end
-
-			local target = nut.command.findPlayer(client, charName)
-
-			if (IsValid(target) and target:getChar()) then
-				
-				if target.InviteToGroup then
-					client:notify(L("groupInvitePending", client))
-					return
-				end
-			
-				target.InviteToGroup = client
-				timer.Simple(25, function()
-					if IsValid(target) then 
-						target.InviteToGroup = nil 
-						target:ChatPrint("Приглашение истекло")
-					end
-				end)
-			end
-				
-		end
-	})*/
 
 	nut.command.add("groupkick", {
 		syntax = "<string name>",
@@ -570,5 +541,3 @@ do
 		end
 	})
 end
-
--- https://music.yandex.ru/artist/4712699/tracks

@@ -1,6 +1,6 @@
-ITEM.name = "Броня"
-ITEM.desc = "Описание."
-ITEM.category = "Броня"
+ITEM.name = "Armor base"
+ITEM.desc = "This is test armor."
+ITEM.category = "Armor"
 ITEM.model = "models/weapons/w_pistol.mdl"
 ITEM.SetModel = "models/aoc_player/e_archer.mdl"
 ITEM.armorClass = "armor" -- don't change
@@ -183,7 +183,7 @@ function ITEM:getDesc()
 	local desc = ""
 	for k in pairs(self.resistData) do
 		if (self.resistData[k] == 1) then continue end
-		desc = Format("%s\nDefence from: %s [%d]", self.desc, dmgInfo(k), self.resistData[k])
+		desc = Format("%s\nDefence from: %s [%d]", L(self.desc or "noDesc"), dmgInfo(k), self.resistData[k])
 	end
 	return desc
 end

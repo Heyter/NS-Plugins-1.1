@@ -1,18 +1,13 @@
-ITEM.name = "Iron Archer"
-ITEM.desc = "Ez for u"
+ITEM.name = "Example model"
+ITEM.desc = "Example model"
 ITEM.category = "Armor"
-ITEM.model = "models/weapons/w_pistol.mdl"
-ITEM.SetModel = "models/aoc_player/e_archer.mdl"
-ITEM.armorGender = "all" -- [ female - only for girls; male - only for mans; all - for all ]
-ITEM.width = 2
-ITEM.height = 2
+ITEM.model = "models/error.mdl"
+ITEM.SetModel = "models/error.mdl"
+ITEM.armorGender = "all"
+ITEM.width = 1
+ITEM.height = 1
 ITEM.resistData = { -- http://wiki.garrysmod.com/page/Enums/DMG
-	[DMG_SLASH] = 1, --Режущий
-	[DMG_CLUB] = 1, --Колющий
-	[DMG_CRUSH] = 1, --Дробящий
-	[DMG_BULLET] = 1, -- Физ. урон
-	[DMG_BURN] = 1, -- сопр. огню.
-	[DMG_GENERIC] = 1,
+	[DMG_FALL] = 2,
 }
-ITEM.price = 10000
+ITEM.price = 0
 ITEM.SetSpeed = 2

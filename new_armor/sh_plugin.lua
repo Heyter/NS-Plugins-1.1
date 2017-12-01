@@ -33,6 +33,8 @@ if (SERVER) then
 							local dmg = v.resistData[dmginfo:GetDamageType()]
 							if (dmg) then
 								dmginfo:ScaleDamage(dmg)
+								--break
+								--dmginfo:SetDamage(dmginfo:GetDamage() * dmg)
 							end
 						end
 					end
