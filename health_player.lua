@@ -5,38 +5,13 @@ PLUGIN.desc = "Saves the health of a character." -- Изменяет текущ�
 
 local HealthID = "saveHealth" -- переменная которая хранит ID сохраняемого здоровья.
 
-local playerMeta = FindMetaTable("Player")
-function playerMeta:getHealth()
-	return (self:getNetVar(HealthID)) or 0
-end
-
 if (SERVER) then
-	local IsValid = IsValid
-	function PLUGIN:PlayerDeath(client)
-		if (!IsValid(client) and !client:IsPlayer()) then
-			return
-		end
-
-		client.refillHealth = true
-	end
-
-	function PLUGIN:PlayerSpawn(client)
-		if (!IsValid(client) and !client:IsPlayer()) then
-			return
-		end
-		
-		if (client.refillHealth) then
-			local hpAmount = client:GetMaxHealth()
-			client:setNetVar(HealthID, hpAmount)
-			client.refillHealth = false
-		end
-	end
-
+	local mClamp = math.Clamp
 	function PLUGIN:CharacterPreSave(character)
 		local client = character:getPlayer()
 		local savedHealth = client:Health()
 		local maxHealth = client:GetMaxHealth()
-		character:setData(HealthID, math.Clamp(savedHealth, 0, maxHealth))
+		character:setData(HealthID, mClamp(savedHealth, 0, maxHealth))
 	end
 
 	function PLUGIN:PlayerLoadedChar(client, character)
@@ -44,15 +19,11 @@ if (SERVER) then
 		local hpAmount = client:GetMaxHealth()
 		if (hpData) then
 			if (hpData <= 0) then
-				client:setNetVar(HealthID, hpAmount)
 				client:SetHealth(hpAmount)
 				return
 			end
 			
-			client:setNetVar(HealthID, math.Clamp(hpData, 0, hpAmount))
-			client:SetHealth(math.Clamp(hpData, 0, hpAmount))
-		else
-			client:setNetVar(HealthID, hpAmount)
+			client:SetHealth(mClamp(hpData, 0, hpAmount))
 		end
 	end
 end
