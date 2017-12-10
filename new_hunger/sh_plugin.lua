@@ -130,7 +130,7 @@ function PLUGIN:OnPlayerInteractItem(client, action, item)
 			if (v.id != item.id) then
 				local itemTable = nut.item.instances[v.id]
 				if (itemTable) then
-					if (itemTable.isFood and itemTable.name == item.name) then
+					if (itemTable.isFood and itemTable.uniqueID == item.uniqueID) then
 						local quantityFood = itemTable:getData("quantity")
 						if (quantityFood >= stack) then continue end
 						local amt = quantityFood + quantity
@@ -145,7 +145,6 @@ function PLUGIN:OnPlayerInteractItem(client, action, item)
 						if (itemTable:getData("quantity") >= stack) then
 							itemTable:setData("quantity", stack)
 						end
-						--item:remove()
 						break
 					end
 				else
