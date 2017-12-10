@@ -1,5 +1,4 @@
 local PLUGIN = PLUGIN
-
 PLUGIN.name = "NPC Item Drop"
 PLUGIN.author = "Hikka (NS 1.1)"
 PLUGIN.desc = "За убийство NPC, будет выпадать вещь"
@@ -19,33 +18,36 @@ PLUGIN.itemDrops = {
 	},
 }
 
-function PLUGIN:OnNPCKilled(entity, attacker)
-	if (!IsValid(entity)) then
-		return
-	end
+if (SERVER) then
+	local IsValid, ipairs, mRand, tRand = IsValid, ipairs, math.random, table.Random
+	function PLUGIN:OnNPCKilled(entity, attacker)
+		if (!IsValid(entity)) then
+			return
+		end
 
-	if (!IsValid(attacker) and !attacker:IsPlayer()) then
-		return
-	end
+		if (!IsValid(attacker) and !attacker:IsPlayer()) then
+			return
+		end
 
-	local chnce, class, money, pos = 100 * math.random(), entity:GetClass(), self.itemDrops.money, entity:GetPos()
-	
-	if (money.enabled and money.all) then
-		nut.currency.spawn(pos + Vector(0, 0, 20), math.random(1, money.amount or 100))
-	end
-	
-	for _, data in ipairs(self.itemDrops.drop) do
-		if (class == data.class) then
-			if (chnce > data.chance) then
+		local chnce, class, money, pos = 100 * mRand(), entity:GetClass(), self.itemDrops.money, entity:GetPos()
+		
+		if (money.enabled and money.all) then
+			nut.currency.spawn(pos + Vector(0, 0, 20), mRand(1, money.amount or 100))
+		end
+		
+		for _, data in ipairs(self.itemDrops.drop) do
+			if (class == data.class) then
+				if (chnce > data.chance) then
+					break
+				end
+				
+				if (money.enabled and !money.all) then
+					nut.currency.spawn(pos + Vector(0, 0, 20), mRand(1, money.amount or 100))
+				end
+				
+				nut.item.spawn(tRand(data.items), pos + Vector(0, 0, 15))
 				break
 			end
-			
-			if (money.enabled and !money.all) then
-				nut.currency.spawn(pos + Vector(0, 0, 20), math.random(1, money.amount or 100))
-			end
-			
-			nut.item.spawn(table.Random(data.items), pos + Vector(0, 0, 15))
-			break
 		end
 	end
 end
