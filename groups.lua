@@ -475,6 +475,35 @@ do
 				
 		end
 	})
+	
+	/*nut.command.add("groupmeinvite", {
+		syntax = "<string name>",
+		onRun = function(client, args)
+			local charName = args[1]
+			if (!charName) then
+				return client:notify(L("invalidArg", client, 1))
+			end
+
+			local target = nut.command.findPlayer(client, charName)
+
+			if (IsValid(target) and target:getChar()) then
+				
+				if target.InviteToGroup then
+					client:notify(L("groupInvitePending", client))
+					return
+				end
+			
+				target.InviteToGroup = client
+				timer.Simple(25, function()
+					if IsValid(target) then 
+						target.InviteToGroup = nil 
+						target:ChatPrint("Приглашение истекло")
+					end
+				end)
+			end
+				
+		end
+	})*/
 
 	nut.command.add("groupkick", {
 		syntax = "<string name>",
