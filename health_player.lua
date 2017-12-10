@@ -7,6 +7,7 @@ local HealthID = "saveHealth" -- переменная которая храни�
 
 if (SERVER) then
 	local mClamp = math.Clamp
+	local HealthID = "saveHealth" -- переменная которая хранит ID сохраняемого здоровья.
 	function PLUGIN:CharacterPreSave(character)
 		local client = character:getPlayer()
 		local savedHealth = client:Health()
