@@ -138,52 +138,62 @@ function ITEM:onRemoved()
 	end
 end
 
-local DMG_ENUMS = {
-	[DMG_GENERIC] = "Generic",
-	[DMG_CRUSH] = "Crushing",
-	[DMG_BULLET] = "Bullet",
-	[DMG_SLASH] = "Cutting",
-	[DMG_BURN] = "Fire",
-	[DMG_VEHICLE] = "Vehicle",
-	[DMG_FALL] = "Fall",
-	[DMG_BLAST] = "Explosion",
-	[DMG_CLUB] = "Crowbar",
-	[DMG_SHOCK] = "Electrical",
-	[DMG_SONIC] = "Sonic",
-	[DMG_ENERGYBEAM] = "Laser",
-	[DMG_NEVERGIB] = "NEVERGIB",
-	[DMG_ALWAYSGIB] = "ALWAYSGIB",
-	[DMG_DROWN] = "Drown",
-	[DMG_PARALYZE] = "Poison",
-	[DMG_NERVEGAS] = "Neurotoxin",
-	[DMG_POISON] = "Poison",
-	[DMG_ACID] = "Toxic chemicals or acid burns",
-	[DMG_AIRBOAT] = "Airboat gun",
-	[DMG_BLAST_SURFACE] = "Underwater dmg",
-	[DMG_BUCKSHOT] = "Shotgun",
-	[DMG_DIRECT] = "DIRECT",
-	[DMG_DISSOLVE] = "Combine ball",
-	[DMG_DROWNRECOVER] = "DROWNRECOVER",
-	[DMG_PHYSGUN] = "Gravity gun",
-	[DMG_PLASMA] = "Plasma",
-	[DMG_PREVENT_PHYSICS_FORCE] = "Physics force",
-	[DMG_RADIATION] = "Radiation",
-	[DMG_REMOVENORAGDOLL] = "REMOVENORAGDOLL",
-	[DMG_SLOWBURN] = "SLOWBURN",
-}
-local function dmgInfo(data)
+function GetDamageName(data)
+	local DMG_ENUMS = {
+		[DMG_GENERIC] = "Generic",
+		[DMG_CRUSH] = "Crushing",
+		[DMG_BULLET] = "Bullet",
+		[DMG_SLASH] = "Cutting",
+		[DMG_BURN] = "Fire",
+		[DMG_VEHICLE] = "Vehicle",
+		[DMG_FALL] = "Fall",
+		[DMG_BLAST] = "Explosion",
+		[DMG_CLUB] = "Crowbar",
+		[DMG_SHOCK] = "Electrical",
+		[DMG_SONIC] = "Sonic",
+		[DMG_ENERGYBEAM] = "Laser",
+		[DMG_NEVERGIB] = "NEVERGIB",
+		[DMG_ALWAYSGIB] = "ALWAYSGIB",
+		[DMG_DROWN] = "Drown",
+		[DMG_PARALYZE] = "Poison",
+		[DMG_NERVEGAS] = "Neurotoxin",
+		[DMG_POISON] = "Poison",
+		[DMG_ACID] = "Toxic chemicals or acid burns",
+		[DMG_AIRBOAT] = "Airboat gun",
+		[DMG_BLAST_SURFACE] = "Underwater dmg",
+		[DMG_BUCKSHOT] = "Shotgun",
+		[DMG_DIRECT] = "DIRECT",
+		[DMG_DISSOLVE] = "Combine ball",
+		[DMG_DROWNRECOVER] = "DROWNRECOVER",
+		[DMG_PHYSGUN] = "Gravity gun",
+		[DMG_PLASMA] = "Plasma",
+		[DMG_PREVENT_PHYSICS_FORCE] = "Physics force",
+		[DMG_RADIATION] = "Radiation",
+		[DMG_REMOVENORAGDOLL] = "REMOVENORAGDOLL",
+		[DMG_SLOWBURN] = "SLOWBURN",
+	}
+
 	local text = "Different"
 	if (DMG_ENUMS[data]) then
 		text = DMG_ENUMS[data]
 	end
+	
 	return text
 end
 
-function ITEM:getDesc()	
-	local desc = ""
-	for k in pairs(self.resistData) do
-		if (self.resistData[k] == 1) then continue end
-		desc = Format("%s\nDefence from: %s [%d]", L(self.desc or "noDesc"), dmgInfo(k), self.resistData[k])
+function ITEM:getDesc()
+	local desc = L(self.description or "noDesc")
+	
+	if self.invID ~= nil then
+		desc = desc .. "\n Defence from: "
+		
+		local resist = self.resistData
+		for k in pairs(resist) do
+			if (resist[k] == 1) then continue end
+			desc = desc .. "\n [*]"..GetDamageName(k)..": " .. math.Round(((1 - resist[k]) * 100), 1).. "%"
+		end
+		resist = nil
 	end
+	
 	return desc
 end
